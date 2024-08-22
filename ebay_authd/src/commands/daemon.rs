@@ -149,10 +149,12 @@ pub fn daemon_loop(mut tman: TokenManager) -> Result<()> {
                 Ok(Some(msg)) => msg,
                 Ok(None) => {
                     warn!("Client broken, kicking");
+                    clients.remove(index);
                     continue;
                 }
                 Err(why) => {
                     error!("Failed to parse message: {why}");
+                    clients.remove(index);
                     continue;
                 }
             };
