@@ -145,10 +145,16 @@ pub fn daemon_loop(mut tman: TokenManager) -> Result<()> {
                 .find(|(_, client)| **client == fd)
                 .unwrap();
 
-            let Some(message) = client.await_message()? else {
-                warn!("Client broken, kicking");
-
-                continue;
+            let message = match client.await_message() {
+                Ok(Some(msg)) => msg,
+                Ok(None) => {
+                    warn!("Client broken, kicking");
+                    continue;
+                }
+                Err(why) => {
+                    error!("Failed to parse message: {why}");
+                    continue;
+                }
             };
 
             let Some(request) = message.into_request() else {
