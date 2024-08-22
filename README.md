@@ -6,7 +6,12 @@ The socket provides a JSON-based messaging protocol for communication. All JSON 
 The UNIX socket is created in `/tmp/ebay_authd.sock`.
 
 ### Notes
-1. This program cannot be used as a service, as the start command requires manual authentication.
+This program cannot be used as a service, as the start command requires manual authentication.
+
+### Compatibility
+- [x] Linux
+- [x] macOS
+- [ ] Windows
 
 ### Usage:
 ```
