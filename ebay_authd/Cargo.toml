@@ -1,0 +1,18 @@
+[package]
+name = "ebay_authd"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+confy = { version = "0.6.1", default-features = false, features = [
+    "yaml_conf",
+] }
+homedir = { version = "0.3.3", default-features = false }
+oauth2 = "4.4.2"
+serde = { version = "1.0.208", features = ["derive"] }
+ebay_authd_core = { path = "../ebay_authd_core" }
+thiserror = "1.0.63"
+simple_logger = "5.0.0"
+log = { version = "0.4.22", features = ["std"] }
+clap = { version = "4.5.16", features = ["derive"] }
+nix = { version = "0.29.0", features = ["poll"] }
