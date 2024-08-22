@@ -33,6 +33,7 @@ impl Client {
         }
 
         buffer.pop();
+        debug!("Received: {buffer}");
         let message = Message::deserialize(&buffer)?;
 
         Ok(Some(message))
@@ -41,6 +42,7 @@ impl Client {
     pub fn message<M: Into<Message>>(&mut self, message: M) -> Result<()> {
         let message = message.into();
         let json = message.serialize()?;
+        debug!("Sending: {json}");
 
         self.writer.write_all(json.as_bytes())?;
         self.writer.write_all(b"\n")?;

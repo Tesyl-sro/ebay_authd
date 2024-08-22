@@ -93,6 +93,7 @@ pub fn start(config: &Configuration) -> Result<()> {
 
     info!("Success, starting daemon");
     daemon_loop(tman)?;
+    info!("Daemon stopped");
 
     Ok(())
 }
