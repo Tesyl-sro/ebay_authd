@@ -1,6 +1,9 @@
 # Ebay API Token Daemon
 
 Automatically fetches the latest Ebay API token and provides an IPC using UNIX sockets.
+The socket provides a JSON-based messaging protocol for communication. All JSON messages must end with a newline (`\n`) character.
+
+The UNIX socket is created in `/tmp/ebay_authd.sock`.
 
 Usage:
 ```
@@ -45,3 +48,17 @@ Options:
 
 ### Note
 This program cannot be used as a service, as the start command requires manual authentication.
+
+### Testing
+Use the testing commands to verify that the daemon is working.
+
+### 3rd party access
+You can use other programs to communicate with the daemon, like `socat`:
+```sh
+# Request the latest token (echo adds a newline)
+echo "{\"Request\": \"Token\"}" | socat - UNIX-CONNECT:/tmp/ebay_authd.sock
+```
+```sh
+# Stop the daemon
+echo "{\"Request\": \"Stop\"}" | socat - UNIX-CONNECT:/tmp/ebay_authd.sock
+```
