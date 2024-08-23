@@ -3,17 +3,13 @@ use crate::{
     client::Client,
     error::{Error, Result},
 };
+use colored::Colorize;
 use ebay_authd_core::{request::Request, response::Response};
-use log::debug;
 use std::os::unix::net::UnixStream;
 
 pub fn token() -> Result<()> {
-    let mut client = send_msg_to_server(Request::Token)?;
-    let response = client
-        .await_message()?
-        .unwrap()
-        .into_response()
-        .ok_or(Error::ExpectedResponse)?;
+    let mut client = connect()?;
+    let response = client.exchange(Request::Token)?;
 
     let Response::Token(token) = response else {
         return Err(Error::UnexpectedResponse);
@@ -23,42 +19,50 @@ pub fn token() -> Result<()> {
     Ok(())
 }
 
-pub fn status() -> Result<()> {
-    let mut client = send_msg_to_server(Request::Status)?;
-    let response = client
-        .await_message()?
-        .unwrap()
-        .into_response()
-        .ok_or(Error::ExpectedResponse)?;
-
-    let Response::Status { version, expiry } = response else {
-        return Err(Error::UnexpectedResponse);
+pub fn status() {
+    let mut client = match connect() {
+        Ok(client) => client,
+        Err(why) => {
+            eprintln!("{} {why}", "Failed to connect to daemon:".red());
+            return;
+        }
     };
 
-    println!("Deamon is active and running.");
-    println!("Version: {version:?}");
-    println!("Next token in: {}s", expiry.as_secs());
+    let response = match client.exchange(Request::Status) {
+        Ok(response) => response,
+        Err(why) => {
+            eprintln!("{} {why}", "Failed to communicate to daemon:".red());
+            return;
+        }
+    };
 
-    Ok(())
+    let Response::Status { version, expiry } = response else {
+        eprintln!("{} {response:?}", "Daemon sent wrong response:".red());
+        return;
+    };
+
+    println!("Daemon: {}", "Running".green());
+    println!("Version: {}", version.blue());
+    println!(
+        "Token expiry: {}{}",
+        expiry.as_secs().to_string().yellow(),
+        "s".yellow()
+    );
 }
 
 pub fn reauth() -> Result<()> {
-    send_msg_to_server(Request::ForceRefresh)?;
+    connect()?.exchange(Request::ForceRefresh)?;
     Ok(())
 }
 
 pub fn stop() -> Result<()> {
-    send_msg_to_server(Request::Stop)?;
+    connect()?.exchange(Request::Stop)?;
     Ok(())
 }
 
-fn send_msg_to_server(req: Request) -> Result<Client> {
-    debug!("Sending request: {req:?}");
-
+fn connect() -> Result<Client> {
     let client = UnixStream::connect(SOCKET_PATH)?;
-    let mut client = Client::new(client)?;
-
-    client.message(req)?;
+    let client = Client::new(client)?;
 
     Ok(client)
 }

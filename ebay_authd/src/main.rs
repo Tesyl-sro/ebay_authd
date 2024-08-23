@@ -47,7 +47,7 @@ fn main() -> Result<()> {
             DaemonCommand::Start => commands::daemon::start(&config)?,
             DaemonCommand::Reauth => commands::testcmds::reauth()?,
             DaemonCommand::Stop => commands::testcmds::stop()?,
-            DaemonCommand::Status => commands::testcmds::status()?,
+            DaemonCommand::Status => commands::testcmds::status(),
         },
         Cli::Test { command } => match command {
             TestCommand::Token => commands::testcmds::token()?,
