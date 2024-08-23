@@ -6,9 +6,12 @@ use crate::{
 };
 use ebay_authd_core::{request::Request, response::Response};
 use log::{debug, error, info, warn};
-use nix::sys::{
-    select::{select, FdSet},
-    time::TimeVal,
+use nix::{
+    errno::Errno,
+    sys::{
+        select::{select, FdSet},
+        time::TimeVal,
+    },
 };
 use oauth2::{
     basic::BasicClient, reqwest::http_client, url::Url, AuthUrl, AuthorizationCode, ClientId,
@@ -23,6 +26,7 @@ use std::{
     },
     path::Path,
     str::FromStr,
+    sync::atomic::{AtomicBool, Ordering},
 };
 
 pub const SOCKET_PATH: &str = "/tmp/ebay_authd.sock";
@@ -44,6 +48,8 @@ const SCOPES: [&str; 12] = [
     "https://api.ebay.com/oauth/api_scope/commerce.notification.subscription.readonly",
     "https://api.ebay.com/oauth/api_scope/sell.stores.readonly",
 ];
+
+static STOP: AtomicBool = AtomicBool::new(false);
 
 pub fn start(config: &Configuration) -> Result<()> {
     info!("Creating client");
@@ -110,7 +116,18 @@ pub fn daemon_loop(mut tman: TokenManager) -> Result<()> {
     listener.set_nonblocking(true)?;
     let mut clients: Vec<Client> = Vec::new();
 
+    ctrlc::set_handler(|| {
+        STOP.store(true, Ordering::SeqCst);
+        info!("Please wait...");
+    })
+    .unwrap();
+
     'outer: loop {
+        if STOP.load(Ordering::Relaxed) {
+            info!("Got stop signal");
+            break;
+        }
+
         let mut fds = FdSet::new();
         fds.insert(listener.as_fd());
 
@@ -119,16 +136,19 @@ pub fn daemon_loop(mut tman: TokenManager) -> Result<()> {
             fds.insert(copy);
         }
 
-        let ready = select(
+        let select_result = select(
             None,
             Some(&mut fds),
             None,
             None,
             Some(&mut TimeVal::new(1, 0)),
-        )?;
+        );
 
-        if ready == 0 {
-            tman.tick()?;
+        match select_result {
+            Ok(0) => tman.tick()?,
+            Err(Errno::EINTR) => continue,
+            Err(other) => return Err(other.into()),
+            Ok(..) => (),
         }
 
         for fd in fds.fds(None) {
