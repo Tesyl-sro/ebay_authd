@@ -36,7 +36,14 @@ pub fn status() {
         }
     };
 
-    let Response::Status { version, expiry } = response else {
+    let Response::Status {
+        version,
+        expiry,
+        last_refresh,
+        short_token,
+        short_refresh_token,
+    } = response
+    else {
         eprintln!("{} {response:?}", "Daemon sent wrong response:".red());
         return;
     };
@@ -47,6 +54,23 @@ pub fn status() {
         "Token expiry: {}{}",
         expiry.as_secs().to_string().yellow(),
         "s".yellow()
+    );
+    println!(
+        "Last refresh: {}{} {}",
+        last_refresh.as_secs().to_string().yellow(),
+        "s".yellow(),
+        "ago".blue()
+    );
+
+    println!(
+        "Current token: {}{}",
+        short_token.bright_cyan(),
+        "...".bright_red()
+    );
+    println!(
+        "Refresh token: {}{}",
+        short_refresh_token.bright_cyan(),
+        "...".bright_red()
     );
 }
 

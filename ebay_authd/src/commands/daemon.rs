@@ -192,6 +192,9 @@ fn handle_client(client: &mut Client, request: Request, tman: &mut TokenManager)
             client.message(Response::Status {
                 version: env!("CARGO_PKG_VERSION").into(),
                 expiry: tman.expiry(),
+                last_refresh: tman.last_refresh(),
+                short_token: tman.short_token(),
+                short_refresh_token: tman.short_refresh_token(),
             })?;
         }
         Request::ForceRefresh => {

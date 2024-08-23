@@ -73,4 +73,21 @@ impl TokenManager {
 
         Ok(())
     }
+
+    pub fn last_refresh(&self) -> Duration {
+        self.refresh.elapsed()
+    }
+
+    pub fn short_token(&self) -> Box<str> {
+        self.token
+            .access_token()
+            .secret()
+            .get(64..96)
+            .unwrap()
+            .into()
+    }
+
+    pub fn short_refresh_token(&self) -> Box<str> {
+        self.refresh_token.secret().get(64..96).unwrap().into()
+    }
 }
