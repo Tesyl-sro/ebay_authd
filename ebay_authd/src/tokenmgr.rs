@@ -3,7 +3,7 @@ use log::info;
 use oauth2::{
     basic::{BasicClient, BasicTokenType},
     reqwest::http_client,
-    EmptyExtraTokenFields, StandardTokenResponse, TokenResponse,
+    EmptyExtraTokenFields, RefreshToken, StandardTokenResponse, TokenResponse,
 };
 use std::time::{Duration, Instant};
 
@@ -13,15 +13,19 @@ type TokenResult = StandardTokenResponse<EmptyExtraTokenFields, BasicTokenType>;
 pub struct TokenManager {
     client: BasicClient,
     token: TokenResult,
+    refresh_token: RefreshToken,
     refresh: Instant,
 }
 
 impl TokenManager {
     #[must_use]
     pub fn new(client: BasicClient, token: TokenResult) -> Self {
+        let refresh_token = token.refresh_token().cloned().unwrap();
+
         Self {
             client,
             token,
+            refresh_token,
             refresh: Instant::now(),
         }
     }
@@ -48,10 +52,9 @@ impl TokenManager {
 
     pub fn refresh(&mut self) -> Result<()> {
         info!("Refreshing token");
-        let refresh_token = self.token.refresh_token().unwrap();
         let new_token = self
             .client
-            .exchange_refresh_token(refresh_token)
+            .exchange_refresh_token(&self.refresh_token)
             .request(http_client)
             .map_err(|_| Error::TokenRequest)?;
 
