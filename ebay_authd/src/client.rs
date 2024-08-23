@@ -1,5 +1,5 @@
-use crate::error::Result;
-use ebay_authd_core::Message;
+use crate::error::{Error, Result};
+use ebay_authd_core::{request::Request, response::Response, Message};
 use log::debug;
 use std::{
     io::{BufRead, BufReader, BufWriter, Write},
@@ -22,6 +22,14 @@ impl Client {
             reader: BufReader::new(stream),
             writer: BufWriter::new(copy),
         })
+    }
+
+    pub fn exchange(&mut self, request: Request) -> Result<Response> {
+        self.message(request)?;
+        let message = self.await_message()?.ok_or(Error::BrokenConnection)?;
+        let response = message.into_response().ok_or(Error::ExpectedResponse)?;
+
+        Ok(response)
     }
 
     pub fn await_message(&mut self) -> Result<Option<Message>> {

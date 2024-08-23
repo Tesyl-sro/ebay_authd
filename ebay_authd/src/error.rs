@@ -33,6 +33,9 @@ pub enum Error {
 
     #[error("Error while performing syscall: {0}")]
     Syscall(#[from] nix::errno::Errno),
+
+    #[error("Broken connection pipe")]
+    BrokenConnection,
 }
 
 pub type Result<T> = ::std::result::Result<T, Error>;
