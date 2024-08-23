@@ -11,6 +11,7 @@ homedir = { version = "0.3.3", default-features = false }
 oauth2 = "4.4.2"
 serde = { version = "1.0.208", features = ["derive"] }
 ebay_authd_core = { path = "../ebay_authd_core" }
+ebay_authd_client = { path = "../ebay_authd_client" }
 thiserror = "1.0.63"
 simple_logger = "5.0.0"
 log = { version = "0.4.22", features = ["std"] }

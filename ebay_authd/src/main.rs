@@ -13,7 +13,6 @@ use simple_logger::SimpleLogger;
 use std::process::exit;
 
 mod cli;
-mod client;
 mod commands;
 mod config;
 mod error;

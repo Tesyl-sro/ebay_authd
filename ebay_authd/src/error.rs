@@ -19,14 +19,8 @@ pub enum Error {
     #[error("Failed to exchange auth code for token")]
     TokenRequest,
 
-    #[error("Serialization: {0}")]
-    Serialize(#[from] ebay_authd_core::SerializeError),
-
     #[error("Stop requested (not an error)")]
     StopRequested,
-
-    #[error("Expected response, got request")]
-    ExpectedResponse,
 
     #[error("Unexpected response")]
     UnexpectedResponse,
@@ -34,8 +28,8 @@ pub enum Error {
     #[error("Error while performing syscall: {0}")]
     Syscall(#[from] nix::errno::Errno),
 
-    #[error("Broken connection pipe")]
-    BrokenConnection,
+    #[error("Client error: {0}")]
+    Client(#[from] ebay_authd_client::error::Error),
 }
 
 pub type Result<T> = ::std::result::Result<T, Error>;

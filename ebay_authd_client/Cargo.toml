@@ -1,0 +1,9 @@
+[package]
+name = "ebay_authd_client"
+version = "1.0.1"
+edition = "2021"
+
+[dependencies]
+ebay_authd_core = { path = "../ebay_authd_core" }
+log = { version = "0.4.22", features = ["std"] }
+thiserror = "1.0.63"

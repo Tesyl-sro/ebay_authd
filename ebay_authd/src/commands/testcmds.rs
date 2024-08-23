@@ -1,9 +1,7 @@
 use super::daemon::SOCKET_PATH;
-use crate::{
-    client::Client,
-    error::{Error, Result},
-};
+use crate::error::{Error, Result};
 use colored::Colorize;
+use ebay_authd_client::Client;
 use ebay_authd_core::{request::Request, response::Response};
 use std::os::unix::net::UnixStream;
 

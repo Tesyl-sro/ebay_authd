@@ -1,9 +1,9 @@
 use crate::{
-    client::Client,
     config::configuration::Configuration,
     error::{Error, Result},
     tokenmgr::TokenManager,
 };
+use ebay_authd_client::Client;
 use ebay_authd_core::{request::Request, response::Response};
 use log::{debug, error, info, warn};
 use nix::{

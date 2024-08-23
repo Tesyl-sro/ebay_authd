@@ -1,5 +1,5 @@
 [workspace]
-members = ["ebay_authd", "ebay_authd_core"]
+members = ["ebay_authd", "ebay_authd_client", "ebay_authd_core"]
 resolver = "2"
 
 [profile.release]

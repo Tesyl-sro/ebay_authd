@@ -9,6 +9,8 @@ use std::{
     },
 };
 
+pub mod error;
+
 pub struct Client {
     reader: BufReader<UnixStream>,
     writer: BufWriter<UnixStream>,
