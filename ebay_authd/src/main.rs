@@ -51,7 +51,6 @@ fn main() -> Result<()> {
         },
         Cli::Test { command } => match command {
             TestCommand::Token => commands::testcmds::token()?,
-            TestCommand::Status => commands::testcmds::status()?,
         },
     }
 

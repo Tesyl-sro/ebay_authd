@@ -30,6 +30,4 @@ pub enum DaemonCommand {
 pub enum TestCommand {
     /// Get the latest token
     Token,
-    /// Get the status of the daemon
-    Status,
 }
