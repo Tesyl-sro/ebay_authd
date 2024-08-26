@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
+#[command(version, about, long_about)]
 pub enum Cli {
     /// Daemon control commands
     Daemon {
