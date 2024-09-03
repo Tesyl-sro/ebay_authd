@@ -78,7 +78,7 @@ pub fn reauth() -> Result<()> {
 }
 
 pub fn stop() -> Result<()> {
-    connect()?.exchange(Request::Stop)?;
+    connect()?.message(Request::Stop)?;
     Ok(())
 }
 
