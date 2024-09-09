@@ -18,15 +18,18 @@ use oauth2::{
     ClientSecret, CsrfToken, PkceCodeChallenge, RedirectUrl, Scope, TokenUrl,
 };
 use std::{
-    fs,
+    env, fs,
     io::stdin,
     os::{
         fd::{AsFd, AsRawFd, BorrowedFd},
         unix::net::UnixListener,
     },
     path::Path,
+    process::{exit, Command},
     str::FromStr,
     sync::atomic::{AtomicBool, Ordering},
+    thread::sleep,
+    time::Duration,
 };
 
 pub const SOCKET_PATH: &str = "/tmp/ebay_authd.sock";
@@ -51,8 +54,19 @@ const SCOPES: [&str; 12] = [
 
 static STOP: AtomicBool = AtomicBool::new(false);
 
-pub fn start(config: &Configuration) -> Result<()> {
-    info!("Creating client");
+pub fn start(config: &Configuration, screen: bool) -> Result<()> {
+    if screen {
+        check_screen()?;
+
+        if !running_in_screen() {
+            info!("Restarting using screen");
+            restart_in_screen()?;
+        }
+
+        info!("Screen session detected");
+    }
+
+    info!("Creating clie7nt");
     let client = BasicClient::new(
         ClientId::new(config.appid.to_string()),
         Some(ClientSecret::new(config.certid.to_string())),
@@ -98,6 +112,12 @@ pub fn start(config: &Configuration) -> Result<()> {
     let tman = TokenManager::new(client, token_result);
 
     info!("Success, starting daemon");
+
+    if screen {
+        info!("Detaching screen");
+        detach_screen()?;
+    }
+
     daemon_loop(tman)?;
     info!("Daemon stopped");
 
@@ -226,5 +246,59 @@ fn handle_client(client: &mut Client, request: Request, tman: &mut TokenManager)
         }
     };
 
+    Ok(())
+}
+
+fn check_screen() -> Result<()> {
+    match Command::new("screen").arg("--version").output() {
+        Ok(output) if output.status.success() => {
+            let version_string = String::from_utf8(output.stdout)?;
+            debug!("Found screen: {version_string}");
+
+            Ok(())
+        }
+        Ok(output) if !output.status.success() => {
+            error!(
+                "screen found but got unexpected status code: {}",
+                output.status
+            );
+            Err(Error::Screen)
+        }
+        Ok(..) => unreachable!(),
+        Err(why) => {
+            error!("screen not installed or not in PATH: {why}");
+            Err(Error::Screen)
+        }
+    }
+}
+
+fn restart_in_screen() -> Result<()> {
+    let args: Vec<String> = env::args().collect();
+
+    // Create a new session
+    Command::new("screen")
+        .arg("-dmS")
+        .arg("ebay_authd")
+        .args(args)
+        .output()?;
+
+    sleep(Duration::from_secs(2));
+
+    // Attach to the new session
+    Command::new("screen")
+        .arg("-r")
+        .arg("ebay_authd")
+        .spawn()?
+        .wait()?;
+
+    exit(0);
+}
+
+fn running_in_screen() -> bool {
+    env::var("STY").is_ok_and(|value| !value.is_empty())
+}
+
+fn detach_screen() -> Result<()> {
+    Command::new("screen").arg("-d").arg("ebay_authd").spawn()?;
     Ok(())
 }

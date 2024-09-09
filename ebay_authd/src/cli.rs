@@ -18,7 +18,11 @@ pub enum Cli {
 #[derive(Debug, Subcommand)]
 pub enum DaemonCommand {
     /// Start the daemon
-    Start,
+    Start {
+        /// Utilize pre-installed screen utility
+        #[arg(long)]
+        screen: bool,
+    },
     /// Get the status of the daemon
     Status,
     /// Fix a broken daemon instance

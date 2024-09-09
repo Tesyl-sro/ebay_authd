@@ -43,7 +43,7 @@ fn main() -> Result<()> {
 
     match cli {
         Cli::Daemon { command } => match command {
-            DaemonCommand::Start => commands::daemon::start(&config)?,
+            DaemonCommand::Start { screen } => commands::daemon::start(&config, screen)?,
             DaemonCommand::Reauth => commands::testcmds::reauth()?,
             DaemonCommand::Stop => commands::testcmds::stop()?,
             DaemonCommand::Status => commands::testcmds::status(),

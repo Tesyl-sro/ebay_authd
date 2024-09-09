@@ -1,5 +1,5 @@
 use confy::ConfyError;
-use std::io;
+use std::{io, string::FromUtf8Error};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -30,6 +30,12 @@ pub enum Error {
 
     #[error("Client error: {0}")]
     Client(#[from] ebay_authd_client::error::Error),
+
+    #[error("Error executing `screen`")]
+    Screen,
+
+    #[error("Failed to convert to UTF-8: {0}")]
+    Utf8(#[from] FromUtf8Error),
 }
 
 pub type Result<T> = ::std::result::Result<T, Error>;
