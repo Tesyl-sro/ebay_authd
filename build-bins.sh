@@ -1,6 +1,6 @@
 #!/bin/sh
 
-TARGETS=("x86_64-unknown-linux-gnu")
+TARGETS=("x86_64-unknown-linux-gnu" "x86_64-unknown-linux-musl")
 BIN_NAME="ebay_authd"
 UPX_FLAGS="--best --lzma"
 
@@ -18,18 +18,6 @@ for target in ${TARGETS[@]}; do
 
             if ! upx $UPX_FLAGS releases/$BIN_NAME-$target-compressed; then
                 rm releases/$BIN_NAME-$target-compressed
-            fi
-        fi
-    fi
-
-    if [ -f target/$target/release/$BIN_NAME.exe ]; then
-        mv target/$target/release/$BIN_NAME.exe releases/$BIN_NAME-$target.exe
-
-        if [ -x "$(command -v upx)" ]; then
-            cp releases/$BIN_NAME-$target.exe releases/$BIN_NAME-$target-compressed.exe
-
-            if ! upx $UPX_FLAGS releases/$BIN_NAME-$target-compressed.exe; then
-                rm releases/$BIN_NAME-$target-compressed.exe
             fi
         fi
     fi
