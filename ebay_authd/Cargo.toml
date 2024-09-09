@@ -1,6 +1,6 @@
 [package]
 name = "ebay_authd"
-version = "1.0.4"
+version = "1.0.5"
 edition = "2021"
 description = "Automatically fetches the latest Ebay API token."
 
