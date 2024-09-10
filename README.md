@@ -67,3 +67,5 @@ echo "{\"Request\": \"Token\"}" | socat - UNIX-CONNECT:/tmp/ebay_authd.sock
 # Stop the daemon
 echo "{\"Request\": \"Stop\"}" | socat - UNIX-CONNECT:/tmp/ebay_authd.sock
 ```
+
+For more detailed information, read the individual READMEs in `ebay_authd_core` and `ebay_authd_client`.
