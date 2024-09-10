@@ -9,7 +9,7 @@ ebay_authd_client = { git = "https://github.com/Tesyl-sro/ebay_authd" }
 ```
 
 You should also specify a tag to lock to a specific version:
-```toml
+```json
 { git = "https://github.com/Tesyl-sro/ebay_authd", tag = "v1.0.5" }
 ```
 
