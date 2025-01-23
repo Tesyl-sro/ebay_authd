@@ -36,6 +36,9 @@ pub enum Error {
 
     #[error("Failed to convert to UTF-8: {0}")]
     Utf8(#[from] FromUtf8Error),
+
+    #[error("Reqwest library error: {0}")]
+    Reqwest(#[from] oauth2::reqwest::Error),
 }
 
 pub type Result<T> = ::std::result::Result<T, Error>;

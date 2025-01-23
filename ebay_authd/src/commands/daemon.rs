@@ -14,8 +14,11 @@ use nix::{
     },
 };
 use oauth2::{
-    basic::BasicClient, reqwest::http_client, url::Url, AuthUrl, AuthorizationCode, ClientId,
-    ClientSecret, CsrfToken, PkceCodeChallenge, RedirectUrl, Scope, TokenUrl,
+    basic::BasicClient,
+    reqwest::{blocking::ClientBuilder, redirect::Policy},
+    url::Url,
+    AuthUrl, AuthorizationCode, ClientId, ClientSecret, CsrfToken, PkceCodeChallenge, RedirectUrl,
+    Scope, TokenUrl,
 };
 use std::{
     env, fs,
@@ -67,13 +70,11 @@ pub fn start(config: &Configuration, screen: bool) -> Result<()> {
     }
 
     info!("Creating clie7nt");
-    let client = BasicClient::new(
-        ClientId::new(config.appid.to_string()),
-        Some(ClientSecret::new(config.certid.to_string())),
-        AuthUrl::new(AUTH_URL.to_string())?,
-        Some(TokenUrl::new(TOKEN_URL.to_string())?),
-    )
-    .set_redirect_uri(RedirectUrl::new(REDIRECT_URL.to_string())?);
+    let client = BasicClient::new(ClientId::new(config.appid.to_string()))
+        .set_client_secret(ClientSecret::new(config.certid.to_string()))
+        .set_auth_uri(AuthUrl::new(AUTH_URL.to_string())?)
+        .set_token_uri(TokenUrl::new(TOKEN_URL.to_string())?)
+        .set_redirect_uri(RedirectUrl::new(REDIRECT_URL.to_string())?);
 
     debug!("Generating PKCE challenge");
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
@@ -103,13 +104,15 @@ pub fn start(config: &Configuration, screen: bool) -> Result<()> {
         .map(|(_, value)| value)
         .unwrap();
 
+    let http_client = ClientBuilder::new().redirect(Policy::none()).build()?;
+
     let token_result = client
         .exchange_code(AuthorizationCode::new(auth_code.into()))
         .set_pkce_verifier(pkce_verifier)
-        .request(http_client)
+        .request(&http_client)
         .map_err(|_| Error::TokenRequest)?;
 
-    let tman = TokenManager::new(client, token_result);
+    let tman = TokenManager::new(client, token_result, http_client);
 
     info!("Success, starting daemon");
 

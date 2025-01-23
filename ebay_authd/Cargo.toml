@@ -9,7 +9,7 @@ confy = { version = "0.6.1", default-features = false, features = [
     "yaml_conf",
 ] }
 homedir = { version = "0.3.4", default-features = false }
-oauth2 = "5.0.0"
+oauth2 = { version = "5.0.0", features = ["reqwest-blocking"] }
 serde = { version = "1.0.217", features = ["derive"] }
 ebay_authd_core = { path = "../ebay_authd_core" }
 ebay_authd_client = { path = "../ebay_authd_client" }

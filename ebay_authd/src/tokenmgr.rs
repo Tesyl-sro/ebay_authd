@@ -1,17 +1,32 @@
 use crate::error::{Error, Result};
 use log::info;
 use oauth2::{
-    basic::{BasicClient, BasicTokenType},
-    reqwest::http_client,
-    EmptyExtraTokenFields, RefreshToken, StandardTokenResponse, TokenResponse,
+    basic::{BasicErrorResponseType, BasicTokenType},
+    reqwest::blocking::Client as HttpClient,
+    Client as GenericOauthClient, EmptyExtraTokenFields, EndpointNotSet, EndpointSet, RefreshToken,
+    RevocationErrorResponseType, StandardErrorResponse, StandardRevocableToken,
+    StandardTokenIntrospectionResponse, StandardTokenResponse, TokenResponse,
 };
 use std::time::{Duration, Instant};
 
+type OauthClient = GenericOauthClient<
+    StandardErrorResponse<BasicErrorResponseType>,
+    StandardTokenResponse<EmptyExtraTokenFields, BasicTokenType>,
+    StandardTokenIntrospectionResponse<EmptyExtraTokenFields, BasicTokenType>,
+    StandardRevocableToken,
+    StandardErrorResponse<RevocationErrorResponseType>,
+    EndpointSet,
+    EndpointNotSet,
+    EndpointNotSet,
+    EndpointNotSet,
+    EndpointSet,
+>;
 type TokenResult = StandardTokenResponse<EmptyExtraTokenFields, BasicTokenType>;
 
 #[derive(Debug)]
 pub struct TokenManager {
-    client: BasicClient,
+    oauth_client: OauthClient,
+    http_client: HttpClient,
     token: TokenResult,
     refresh_token: RefreshToken,
     refresh: Instant,
@@ -19,11 +34,12 @@ pub struct TokenManager {
 
 impl TokenManager {
     #[must_use]
-    pub fn new(client: BasicClient, token: TokenResult) -> Self {
+    pub fn new(client: OauthClient, token: TokenResult, http_client: HttpClient) -> Self {
         let refresh_token = token.refresh_token().cloned().unwrap();
 
         Self {
-            client,
+            oauth_client: client,
+            http_client,
             token,
             refresh_token,
             refresh: Instant::now(),
@@ -53,9 +69,9 @@ impl TokenManager {
     pub fn refresh(&mut self) -> Result<()> {
         info!("Refreshing token");
         let new_token = self
-            .client
+            .oauth_client
             .exchange_refresh_token(&self.refresh_token)
-            .request(http_client)
+            .request(&self.http_client)
             .map_err(|_| Error::TokenRequest)?;
 
         self.refresh = Instant::now();
