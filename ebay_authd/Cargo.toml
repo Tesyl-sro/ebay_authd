@@ -2,7 +2,12 @@
 name = "ebay_authd"
 version = "1.0.5"
 edition = "2021"
+authors = ["Fábián Varga <23280129+br0kenpixel@users.noreply.github.com>"]
 description = "Automatically fetches the latest Ebay API token."
+homepage = "https://github.com/PixelWeatherProject"
+license-file = "LICENSE"
+readme = "README.md"
+repository = "https://github.com/Tesyl-sro/ebay_authd/tree/main/ebay_authd"
 
 [dependencies]
 confy = { version = "0.6.1", default-features = false, features = [
