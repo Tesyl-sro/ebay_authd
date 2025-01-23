@@ -69,7 +69,7 @@ pub fn start(config: &Configuration, screen: bool) -> Result<()> {
         info!("Screen session detected");
     }
 
-    info!("Creating clie7nt");
+    info!("Creating client");
     let client = BasicClient::new(ClientId::new(config.appid.to_string()))
         .set_client_secret(ClientSecret::new(config.certid.to_string()))
         .set_auth_uri(AuthUrl::new(AUTH_URL.to_string())?)
