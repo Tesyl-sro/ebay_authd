@@ -61,12 +61,13 @@ impl Client {
         Ok(())
     }
 
+    #[must_use]
     pub fn as_raw_fd(&self) -> i32 {
         self.reader.get_ref().as_raw_fd()
     }
 }
 
-impl<'f> PartialEq<BorrowedFd<'f>> for Client {
+impl PartialEq<BorrowedFd<'_>> for Client {
     fn eq(&self, other: &BorrowedFd) -> bool {
         let other = other.as_raw_fd();
         let this = self.as_raw_fd();
