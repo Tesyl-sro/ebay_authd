@@ -5,5 +5,5 @@ edition = "2021"
 
 [dependencies]
 ebay_authd_core = { path = "../ebay_authd_core" }
-log = { version = "0.4.22", features = ["std"] }
-thiserror = "1.0.63"
+log = { version = "0.4.25", features = ["std"] }
+thiserror = "2.0.11"
